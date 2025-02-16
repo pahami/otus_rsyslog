@@ -1,0 +1,4 @@
+[all]
+web ansible_host=127.0.0.1 ansible_port=2222 ansible_private_key_file=.vagrant/machines/watchlog/virtualbox/private_key
+log ansible_host=127.0.0.1 ansible_port=2222 ansible_private_key_file=.vagrant/machines/nginx/virtualbox/private_key
+client ansible_host=127.0.0.1 ansible_port=2222 ansible_private_key_file=.vagrant/machines/spawn/virtualbox/private_key

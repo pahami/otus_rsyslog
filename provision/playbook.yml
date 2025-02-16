@@ -1,0 +1,79 @@
+---
+- hosts: all
+  become: yes
+  tasks:
+# Настройка времени
+  - name: Set timezone to Europe/Moscow
+    become: true
+    community.general.timezone:
+      name: Europe/Moscow
+  - name: Update repositories cache and apt
+    ansible.builtin.apt:
+      update_cache: yes
+    tags: 
+      -update apt
+  
+# Настройка ВМ web      
+- hosts: web
+  become: yes
+  tasks:
+    - name: Install nginx
+      ansible.builtin.apt:
+        name: nginx
+        state: latest
+   
+    - name: access_log
+      ansible.builtin.lineinfile:
+        path: /etc/nginx/nginx.conf
+        insertafter: 'access_log /var/log/nginx/access.log;'
+        line: '        access_log syslog:server=192.168.56.15:514,tag=nginx_access,severity=info combined;'
+        state: present
+
+    - name: error_log
+      ansible.builtin.lineinfile:
+        path: /etc/nginx/nginx.conf
+        insertafter: 'error_log /var/log/nginx/error.log;'
+        line: '        error_log syslog:server=192.168.56.15:514,tag=nginx_error;'
+        state: present
+
+    - name: Restart Nginx
+      ansible.builtin.systemd:
+        service: nginx
+        state: restarted
+
+- hosts: log
+  become: yes
+  tasks:
+
+    - name: Copy a new rsyslog.conf file into place, backing up the original if it differs from the copied version
+      ansible.builtin.copy:
+        src: rsyslog.conf
+        dest: /etc/rsyslog.conf
+        owner: root
+        group: root
+        mode: '0644'
+        backup: yes
+     
+    - name: Restart Rsyslog
+      ansible.builtin.systemd:
+        service: rsyslog
+        state: restarted
+
+- hosts: client
+  become: yes
+  tasks:
+    - name: adding a line
+      lineinfile:
+        path: /etc/rsyslog.conf
+        line: '*.* @192.168.56.15'
+   
+    - name: Restart Rsyslog
+      ansible.builtin.systemd:
+        service: rsyslog
+        state: restarted
+  
+
+
+
+
+
