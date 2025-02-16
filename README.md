@@ -82,9 +82,7 @@ sudo groupadd -f admin
 ----------------------------
 
 ```
-
 curl localhost:80
-
 ```
 
   HOST log:
